@@ -13,6 +13,9 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "Mesh.h"
+#include "OffReader.h"
+
 void render(GLFWwindow*);
 void init();
 
@@ -21,6 +24,9 @@ void init();
 float v = 0.0f;
 float pos = 0.0f;
 float data[16] = {-0.5,-0.5,0,1 ,0.5,-0.5,0,1, 0.5,0.5,0,1, -0.5,0.5,0, 1};
+
+Mesh mesh;
+OffReader reader;
 
 glm::vec4 p1centre(-0.5,-0.5,0,1);
 glm::vec4 pextend(0.5,0.5,0,0);
@@ -202,6 +208,11 @@ struct
 
 void init()
 {
+
+	mesh = reader.import("bunny.off");
+	mesh.normalize();
+	mesh.center();
+	
 
 	// Build our program and an empty VAO
 	gs.program = buildProgram("basic.vsl", "basic.fsl");
