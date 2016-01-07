@@ -21,6 +21,15 @@
     <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Modelisation\Tp03_Transformations_Etudiants\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modelisation\Tp03_Transformations_Etudiants\OffReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modelisation\Tp03_Transformations_Etudiants\struct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="glm\CMakeLists.txt">
@@ -96,6 +105,15 @@
     </ClInclude>
     <ClInclude Include="glm\vector_relational.hpp">
       <Filter>glm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modelisation\Tp03_Transformations_Etudiants\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modelisation\Tp03_Transformations_Etudiants\OffReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modelisation\Tp03_Transformations_Etudiants\struct.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

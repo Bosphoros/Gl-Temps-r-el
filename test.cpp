@@ -35,6 +35,8 @@ glm::vec3 camPos(0,2,3);
 glm::mat4 lookat = glm::lookAt(camPos, glm::vec3(0,0,0), glm::vec3(0,0,1));
 glm::mat4 perspective = glm::perspective(glm::radians(60.0f), float(4)/float(3), 0.1f, 100.0f);
 
+std::vector<point3> points;
+
 /*glm::vec4 p3(0.5,0.5,0,1);
 glm::vec4 p4(-0.5,0.5,0,1);*/
 
@@ -203,29 +205,50 @@ struct
 {
 	GLuint program; // a shader
 	GLuint vao; // a vertex array object
+	GLuint vbo;
 	GLuint buffer;
 } gs;
+
+void fillPoints(){
+	for(int i = 0; i < mesh.faces.size(); ++i) {
+		
+		points.push_back(mesh.points.at(mesh.faces.at(i)));
+	}
+}
 
 void init()
 {
 
 	mesh = reader.import("bunny.off");
-	mesh.normalize();
 	mesh.center();
+	mesh.normalize();
 	
+	fillPoints();
 
 	// Build our program and an empty VAO
 	gs.program = buildProgram("basic.vsl", "basic.fsl");
 	glGenBuffers(1, &(gs.buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*4, data, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(double)*3*points.size(), &points[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(double)*3*mesh.points.size(), &(mesh.points)[0], GL_STATIC_DRAW);
+
 
 	glCreateVertexArrays(1, &gs.vao);
 	glBindVertexArray(gs.vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
-	glVertexAttribPointer(10, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, 0);
+	glVertexAttribPointer(10, 3, GL_DOUBLE, GL_FALSE, sizeof(double)*3, 0);
 	glEnableVertexAttribArray(10);
+
+	glGenBuffers(1, &(gs.vbo));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gs.vbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.faces.size() * sizeof(int), &(mesh.faces)[0], GL_STATIC_DRAW);
+	
+	for(int i = 0 ; i < mesh.faces.size(); ++i) {
+		if(!(points.at(i) == mesh.points.at(mesh.faces.at(i)))) {
+			std::cout << "Bouh" << std::endl;
+		}
+	}
 
 	glBindVertexArray(0);
 }
@@ -239,9 +262,11 @@ void render(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(gs.program);
 	glBindVertexArray(gs.vao);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gs.vbo);
 
 	{
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		//glDrawArrays(GL_TRIANGLES, 0, points.size());
+		glDrawElements(GL_TRIANGLES, mesh.faces.size(), GL_INT, (void*)0);
 	}
 
 	glBindVertexArray(0);

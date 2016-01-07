@@ -73,12 +73,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Modelisation\Tp03_Transformations_Etudiants\Mesh.cpp" />
+    <ClCompile Include="..\Modelisation\Tp03_Transformations_Etudiants\OffReader.cpp" />
+    <ClCompile Include="..\Modelisation\Tp03_Transformations_Etudiants\struct.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="glm\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Modelisation\Tp03_Transformations_Etudiants\Mesh.h" />
+    <ClInclude Include="..\Modelisation\Tp03_Transformations_Etudiants\OffReader.h" />
+    <ClInclude Include="..\Modelisation\Tp03_Transformations_Etudiants\struct.h" />
     <ClInclude Include="glm\common.hpp" />
     <ClInclude Include="glm\exponential.hpp" />
     <ClInclude Include="glm\ext.hpp" />
