@@ -1,12 +1,14 @@
 #version 430
 
-layout(location = 10) in vec4 vcentre;
-
+layout(location = 10) in vec3 vcentre;
+layout(location = 11) in vec3 norm;
 layout(location = 5) uniform mat4 mvp;
 
+out vec3 normOut;
 
 void main()
 {
-	gl_Position = mvp * vcentre;
+	normOut = norm;
+	gl_Position = mvp * vec4(vcentre, 1);
   
 }

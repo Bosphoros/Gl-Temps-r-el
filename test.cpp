@@ -214,7 +214,7 @@ struct
 void fillPoints(){
 	for(int i = 0; i < mesh.points.size(); ++i) {
 		points.push_back(mesh.points.at(i));
-		//points.push_back(mesh.normalesPoints.at(i));
+		points.push_back(mesh.normalesPoints.at(i));
 	}
 
 	for(int i = 0; i < mesh.faces.size(); ++i) {
@@ -235,6 +235,9 @@ void init()
 
 	// Build our program and an empty VAO
 	gs.program = buildProgram("basic.vsl", "basic.fsl");
+
+	glEnable(GL_DEPTH_TEST);
+
 	glGenBuffers(1, &(gs.buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(double)*3*points.size(), &points[0], GL_STATIC_DRAW);
@@ -245,12 +248,12 @@ void init()
 	glBindVertexArray(gs.vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
-	glVertexAttribPointer(10, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, 0);
+	glVertexAttribPointer(10, 3, GL_FLOAT, GL_FALSE, sizeof(float)*2*3, 0);
 	glEnableVertexAttribArray(10);
 
-	/*glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
 	glVertexAttribPointer(11, 3, GL_FLOAT, GL_FALSE, sizeof(float)*2*3, (void *) (sizeof(float)*3));
-	glEnableVertexAttribArray(11);*/
+	glEnableVertexAttribArray(11);
 
 	glGenBuffers(1, &(gs.vbo));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gs.vbo);
@@ -265,6 +268,7 @@ void render(GLFWwindow* window)
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
+	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(gs.program);
 	glBindVertexArray(gs.vao);
@@ -298,6 +302,6 @@ void render(GLFWwindow* window)
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);*/
 
-	camPos = glm::rotateZ(camPos, glm::radians(2.0f));
-	lookat = glm::lookAt(camPos, glm::vec3(0,0,0), glm::vec3(0,0,1));
+	camPos = glm::rotateY(camPos, glm::radians(2.0f));
+	lookat = glm::lookAt(camPos, glm::vec3(0,0,0), glm::vec3(0,1,0));
 }
