@@ -25,6 +25,18 @@ float v = 0.0f;
 float pos = 0.0f;
 float data[16] = {-0.5,-0.5,0,1 ,0.5,-0.5,0,1, 0.5,0.5,0,1, -0.5,0.5,0, 1};
 
+/*******************************************************************************
+****************** IDS *********************************************************
+*******************************************************************************/
+
+#define LUX_CAM 4
+#define ROTATION_CAM 5
+#define LIGHT 6
+
+#define POINTS 10
+#define NORMALES 11
+
+
 Mesh mesh;
 OffReader reader;
 
@@ -37,10 +49,8 @@ glm::mat4 perspective = glm::perspective(glm::radians(60.0f), float(4)/float(3),
 
 std::vector<point3> points;
 std::vector<unsigned int> indices;
-glm::vec3 light(0, 1, 0); 
+glm::vec3 light(2, 2, 2); 
 
-/*glm::vec4 p3(0.5,0.5,0,1);
-glm::vec4 p4(-0.5,0.5,0,1);*/
 
 // This function is called on any openGL API error
 void debug(GLenum, // source
@@ -209,6 +219,8 @@ struct
 	GLuint vao; // a vertex array object
 	GLuint vbo;
 	GLuint buffer;
+	GLuint depthTexture;
+	GLuint fbo;
 } gs;
 
 void fillPoints(){
@@ -225,16 +237,17 @@ void fillPoints(){
 void init()
 {
 
-	mesh = reader.import("bunny.off");
+	mesh = reader.import("C:/Users/etu/Documents/GitHub/Gl-Temps-r-el/bunny.off");
 	mesh.center();
 	mesh.normalize();
 	mesh.norms();
 	mesh.normsPoints();
+	mesh.scale(2);
 	
 	fillPoints();
 
 	// Build our program and an empty VAO
-	gs.program = buildProgram("basic.vsl", "basic.fsl");
+	gs.program = buildProgram("C:/Users/etu/Documents/GitHub/Gl-Temps-r-el/basic.vsl", "C:/Users/etu/Documents/GitHub/Gl-Temps-r-el/basic.fsl");
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -248,60 +261,97 @@ void init()
 	glBindVertexArray(gs.vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
-	glVertexAttribPointer(10, 3, GL_FLOAT, GL_FALSE, sizeof(float)*2*3, 0);
-	glEnableVertexAttribArray(10);
+	glVertexAttribPointer(POINTS, 3, GL_FLOAT, GL_FALSE, sizeof(float)*2*3, 0);
+	glEnableVertexAttribArray(POINTS);
 
 	glBindBuffer(GL_ARRAY_BUFFER, gs.buffer);
-	glVertexAttribPointer(11, 3, GL_FLOAT, GL_FALSE, sizeof(float)*2*3, (void *) (sizeof(float)*3));
-	glEnableVertexAttribArray(11);
+	glVertexAttribPointer(NORMALES, 3, GL_FLOAT, GL_FALSE, sizeof(float)*2*3, (void *) (sizeof(float)*3));
+	glEnableVertexAttribArray(NORMALES);
 
 	glGenBuffers(1, &(gs.vbo));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gs.vbo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
+	// create the depth texture
+	glGenTextures(1, &gs.depthTexture);
+	glBindTexture(GL_TEXTURE_2D, gs.depthTexture);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, 800, 800);
+
+	// Framebuffer
+	glGenFramebuffers(1, &gs.fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, gs.fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gs.depthTexture, 0);
+
+	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	// Texture
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gs.depthTexture);
+
 	glBindVertexArray(0);
 }
 
-void render(GLFWwindow* window)
-{
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-	glViewport(0, 0, width, height);
+void renderShadowMap() {
+
+	
+
+	lookat = glm::lookAt(light, glm::vec3(0,0,0), glm::vec3(0,1,0));
+	glm::mat4 mat = perspective*lookat;
+
+	glProgramUniformMatrix4fv(gs.program, ROTATION_CAM, 1, false, &mat[0][0]);
+	glProgramUniform3fv(gs.program, LIGHT, 1, &light[0]);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(gs.program);
 	glBindVertexArray(gs.vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gs.vbo);
 
 	{
-		//glDrawArrays(GL_TRIANGLES, 0, points.size());
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
 	}
 
 	glBindVertexArray(0);
 	glUseProgram(0);
 
+}
 
-	v += 0.01;
-	v = std::fmodf(v, 1.0f);
+void renderCamera() {
+	
 
-	glm::mat4 mat = perspective*lookat;
-
-	glProgramUniform1f(gs.program, 4, v);
-	glProgramUniformMatrix4fv(gs.program, 5, 1, false, &mat[0][0]);
-	glProgramUniform3fv(gs.program, 6, 1, &light[0]);
-	/*glProgramUniform4fv(gs.program, 0, 1, &p1centre[0]);
-	glProgramUniform4fv(gs.program, 1, 1, &pextend[0]);*/
-
-	//glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-	/*glProgramUniform1f(gs.program, 4, v);
-	glProgramUniform4fv(gs.program, 0, 1, &p2centre[0]);
-	glProgramUniform4fv(gs.program, 1, 1, &pextend[0]);
-
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);*/
-
-	camPos = glm::rotateY(camPos, glm::radians(2.0f));
 	lookat = glm::lookAt(camPos, glm::vec3(0,0,0), glm::vec3(0,1,0));
+	glm::mat4 mat = perspective*lookat;
+	glm::mat4 luxMat = perspective*glm::lookAt(light, glm::vec3(0,0,0), glm::vec3(0,1,0));
+
+	glProgramUniformMatrix4fv(gs.program, ROTATION_CAM, 1, false, &mat[0][0]);
+	glProgramUniformMatrix4fv(gs.program, LUX_CAM, 1, false, &luxMat[0][0]);
+	glProgramUniform3fv(gs.program, LIGHT, 1, &light[0]);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glUseProgram(gs.program);
+	glBindVertexArray(gs.vao);
+
+	{
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
+	}
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void render(GLFWwindow* window)
+{
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	glViewport(0, 0, 800,800);
+	glBindFramebuffer(GL_FRAMEBUFFER, gs.fbo);
+	renderShadowMap();
+
+	glViewport(0,0, width,height);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	renderCamera();
+
+	light = glm::rotateY(light, glm::radians(1.0f));
 }

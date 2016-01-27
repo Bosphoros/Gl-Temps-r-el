@@ -1,12 +1,29 @@
 #version 430
 
 out vec4 color_out;
-layout(location = 4) uniform float v;
 layout(location = 6) uniform vec3 light;
+layout(location = 4) uniform mat4 luxMat;
 
 in vec3 normOut;
+in vec3 posOut;
+
+layout(binding=0) uniform sampler2D textureDepth;
 
 void main()
 {
-	color_out = dot(light,normOut)*vec4(1, 1, 1, 1);
+	
+	vec4 posInLight = luxMat * vec4(posOut, 1);
+    posInLight /= posInLight.w;
+
+    posInLight += vec4(1.f, 1.f, 1.f, 0.f);
+    posInLight /= vec4(2.f, 2.f, 2.f, 1.f);
+
+	vec4 depth = texture(textureDepth, posInLight.xy);
+	vec3 dirLux = normalize(light - posOut);
+	if(posInLight.z > depth.x + 0.005f) {
+		color_out = dot(dirLux,normOut)*vec4(1, 1, 1, 1)*0.2;
+	}
+	else {
+		color_out = dot(dirLux,normOut)*vec4(1, 1, 1, 1);
+	}
 }
