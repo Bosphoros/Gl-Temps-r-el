@@ -237,7 +237,7 @@ void fillPoints(){
 void init()
 {
 
-	mesh = reader.import("C:/Users/etu/Documents/GitHub/Gl-Temps-r-el/bunny.off");
+	mesh = reader.import("bunny.off");
 	mesh.center();
 	mesh.normalize();
 	mesh.norms();
@@ -247,7 +247,7 @@ void init()
 	fillPoints();
 
 	// Build our program and an empty VAO
-	gs.program = buildProgram("C:/Users/etu/Documents/GitHub/Gl-Temps-r-el/basic.vsl", "C:/Users/etu/Documents/GitHub/Gl-Temps-r-el/basic.fsl");
+	gs.program = buildProgram("basic.vsl", "basic.fsl");
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -353,5 +353,5 @@ void render(GLFWwindow* window)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	renderCamera();
 
-	light = glm::rotateY(light, glm::radians(1.0f));
+	camPos = glm::rotateY(camPos, glm::radians(1.0f));
 }

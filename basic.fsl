@@ -21,9 +21,9 @@ void main()
 	vec4 depth = texture(textureDepth, posInLight.xy);
 	vec3 dirLux = normalize(light - posOut);
 	if(posInLight.z > depth.x + 0.005f) {
-		color_out = dot(dirLux,normOut)*vec4(1, 1, 1, 1)*0.2;
+		color_out = dot(dirLux,normOut)*vec4(normOut.x, normOut.y, normOut.z, 1)*0.2;
 	}
 	else {
-		color_out = dot(dirLux,normOut)*vec4(1, 1, 1, 1);
+		color_out = dot(dirLux,normOut)*vec4(normOut.x, normOut.y, normOut.z, 1);
 	}
 }
